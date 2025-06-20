@@ -2,6 +2,7 @@ package com.vedha.mybatchdemo.config;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import com.vedha.mybatchdemo.mytasklets.SimpleTasklet;
+import com.vedha.mybatchdemo.service.MyJobListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
@@ -30,6 +31,9 @@ public class FirstJobConfig {
     @Autowired
     private SimpleTasklet simpleTasklet;
 
+    @Autowired
+    private MyJobListener myJobListener;
+
     @Bean
     public DataSource dataSource() {
         /*  return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.)
@@ -51,6 +55,7 @@ public class FirstJobConfig {
     Job myFirstJob(JobRepository jobRepository, Step myFirstStep, Step mySecondStep, PlatformTransactionManager platformTransactionManager){
         return new JobBuilder("FirstJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
+                .listener(myJobListener)
                 .start(myFirstStep)
                 .next(mySecondStep)
                 .build();
