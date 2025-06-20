@@ -1,6 +1,7 @@
 package com.vedha.mybatchdemo.config;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
+import com.vedha.mybatchdemo.mytasklets.SimpleTasklet;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
@@ -12,6 +13,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -25,11 +27,15 @@ import javax.sql.DataSource;
 @Component
 public class FirstJobConfig {
 
+    @Autowired
+    private SimpleTasklet simpleTasklet;
+
     @Bean
     public DataSource dataSource() {
-//        return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.)
-//                .addScript("/org/springframework/batch/core/schema-hsqldb.sql")
-//                .generateUniqueName(true).build();
+        /*  return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.)
+                .addScript("/org/springframework/batch/core/schema-hsqldb.sql")
+                .generateUniqueName(true).build();*/
+
         DriverManagerDataSource dataSource =  new DriverManagerDataSource ();
         dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         dataSource.setUrl("jdbc:sqlserver://localhost:1433;databaseName=MySpringBatch;integratedSecurity=true;encrypt=false;trustServerCertificate=true;"); // encrypt=false
@@ -42,10 +48,11 @@ public class FirstJobConfig {
     }
 
     @Bean
-    Job myFirstJob(JobRepository jobRepository, Step myFirstStep, PlatformTransactionManager platformTransactionManager){
+    Job myFirstJob(JobRepository jobRepository, Step myFirstStep, Step mySecondStep, PlatformTransactionManager platformTransactionManager){
         return new JobBuilder("FirstJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(myFirstStep)
+                .next(mySecondStep)
                 .build();
     }
 
@@ -53,6 +60,13 @@ public class FirstJobConfig {
     Step myFirstStep(JobRepository jobRepository, Tasklet firstTasklet, PlatformTransactionManager platformTransactionManager){
         return new StepBuilder("FirstStep", jobRepository)
                 .tasklet(firstTasklet, platformTransactionManager)
+                .build();
+    }
+
+    @Bean
+    Step mySecondStep(JobRepository jobRepository, Tasklet firstTasklet, PlatformTransactionManager platformTransactionManager){
+        return new StepBuilder("SecondStep", jobRepository)
+                .tasklet(simpleTasklet, platformTransactionManager)
                 .build();
     }
 
