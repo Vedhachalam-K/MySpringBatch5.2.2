@@ -6,6 +6,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -43,6 +44,7 @@ public class FirstJobConfig {
     @Bean
     Job myFirstJob(JobRepository jobRepository, Step myFirstStep, PlatformTransactionManager platformTransactionManager){
         return new JobBuilder("FirstJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .start(myFirstStep)
                 .build();
     }
