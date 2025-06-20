@@ -10,6 +10,7 @@ public class MyJobListener implements JobExecutionListener {
     @Override
     public void beforeJob(JobExecution jobExecution) {
         System.out.println("Before-Job listener");
+        jobExecution.getExecutionContext().put("myMessage", "Message from JobListener");
     }
 
     @Override

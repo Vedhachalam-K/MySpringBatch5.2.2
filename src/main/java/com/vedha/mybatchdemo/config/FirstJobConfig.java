@@ -81,6 +81,13 @@ public class FirstJobConfig {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
                 System.out.println("Inside First Tasklet");
+
+                //Right way of setting a message in JobExecutionContext inside a tasklet step
+                chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().put("taskletMessage","Message from step one");
+
+                //Incorrect way of setting up a message
+                //chunkContext.getStepContext().getJobExecutionContext().put("contextMessage","Message from step one");
+
                 return RepeatStatus.FINISHED;
             }
         };
